@@ -4,32 +4,10 @@ from django.db import models
 
 MIN_TIME_COOKING = 1
 MAX_TIME_COOKING = 360
-MIN_INGREDIENT_COUNT = 1
-MAX_INGREDIENT_COUNT = 1000
+MIN_INGREDIENT_AMOUNT = 1
+MAX_INGREDIENT_AMOUNT = 1000
 
 User = get_user_model()
-
-
-class Ingredient(models.Model):
-    """ Модель Ингредиент """
-    name = models.CharField(
-        default='Ингредиент',
-        max_length=256,
-        verbose_name='Наименование ингредиента',
-    )
-    measurement_unit = models.CharField(
-        default='шт.',
-        max_length=210,
-        verbose_name='Единица измерения',
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
 
 
 class Tag(models.Model):
@@ -55,6 +33,28 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    """ Модель Ингредиент """
+    name = models.CharField(
+        default='Ингредиент',
+        max_length=256,
+        verbose_name='Наименование ингредиента',
+    )
+    measurement_unit = models.CharField(
+        default='шт.',
+        max_length=210,
+        verbose_name='Единица измерения',
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
     def __str__(self):
@@ -165,8 +165,8 @@ class IngredientsRecipes(models.Model):
     )
     amount = models.PositiveIntegerField(
         validators=[
-            MinValueValidator(limit_value=MIN_INGREDIENT_COUNT),
-            MaxValueValidator(limit_value=MAX_INGREDIENT_COUNT),
+            MinValueValidator(limit_value=MIN_INGREDIENT_AMOUNT),
+            MaxValueValidator(limit_value=MAX_INGREDIENT_AMOUNT),
         ],
         verbose_name='Количество ингредиента',
     )
@@ -284,10 +284,10 @@ class ShoppingCart(models.Model):
         verbose_name='Ингредиент',
         related_name='ingredient_shopping_carts'
     )
-    count = models.PositiveIntegerField(
+    amount = models.PositiveIntegerField(
         validators=[
-            MinValueValidator(limit_value=MIN_INGREDIENT_COUNT),
-            MaxValueValidator(limit_value=MAX_INGREDIENT_COUNT),
+            MinValueValidator(limit_value=MIN_INGREDIENT_AMOUNT),
+            MaxValueValidator(limit_value=MAX_INGREDIENT_AMOUNT),
         ],
         verbose_name='Количество ингредиента',
     )

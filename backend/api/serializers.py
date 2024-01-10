@@ -1,15 +1,16 @@
 import base64
-
 import webcolors
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import (Favorite, Ingredient, IngredientsRecipes, Recipe,
-                            Subscription, Tag, TagsRecipes)
 from rest_framework import serializers
+
+from recipes.models import (Favorite, Ingredient, IngredientsRecipes, Recipe,
+                            ShoppingCart, Subscription, Tag, TagsRecipes)
 
 EMAIL_MAX_LENGTH = 254
 USERNAME_MAX_LENGTH = 150
@@ -25,7 +26,6 @@ USER_FIELDS = {
     'last_name': LAST_NAME_MAX_LENGTH,
 }
 
-# key - field_name, value - multiple field
 RECIPE_FIELDS = [
     'tags',
     'ingredients',
@@ -46,7 +46,9 @@ class Hex2NameColor(serializers.Field):
         try:
             data = webcolors.hex_to_name(data)
         except ValueError:
-            raise serializers.ValidationError('Для этого цвета нет имени')
+            raise serializers.ValidationError(
+                'Для этого цвета нет имени'
+            )
         return data
 
 
@@ -55,12 +57,15 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+            data = ContentFile(
+                base64.b64decode(imgstr), name='temp.' + ext
+            )
 
         return super().to_internal_value(data)
 
 
 class CustomUserSerializer(UserSerializer):
+    """ Сериализатор для отображения Пользователя"""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -78,6 +83,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
+    """ Сериализатор для создания Пользователя"""
     class Meta:
         model = User
         fields = (
@@ -164,7 +170,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only=True
     )
     tags = TagSerializer(read_only=True, many=True)
-    image = Base64ImageField(required=True, allow_null=False)
+    image = Base64ImageField(allow_null=False)
     author = CustomUserSerializer(required=False)
     is_favorited = serializers.SerializerMethodField(
         required=False, default=False
@@ -249,6 +255,29 @@ class RecipeSerializer(serializers.ModelSerializer):
             TagsRecipes.objects.create(
                 tag=get_object_or_404(Tag, id=tag), recipe=recipe)
         return recipe
+
+    def update(self, instance, validated_data):
+        """ Обновляем запись в БД о рецепте """
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        instance.image = validated_data.get('image')
+        instance.name = validated_data.get('name')
+        instance.text = validated_data.get('text')
+        instance.cooking_time = validated_data.get('cooking_time')
+        IngredientsRecipes.objects.filter(recipe=instance).delete()
+        TagsRecipes.objects.filter(recipe=instance).delete()
+        for ingredient in ingredients:
+            IngredientsRecipes.objects.create(
+                ingredient=get_object_or_404(
+                    Ingredient, id=ingredient['id']
+                ),
+                recipe=instance,
+                amount=ingredient['amount'])
+        for tag in tags:
+            TagsRecipes.objects.create(
+                tag=get_object_or_404(Tag, id=tag), recipe=instance)
+        instance.save()
+        return instance
 
 
 class SubscriptionRecipeSerializer(serializers.ModelSerializer):
@@ -345,3 +374,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time',)
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """ Сериализатор для Списка покупок """
+
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
