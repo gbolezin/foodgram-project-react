@@ -1,7 +1,16 @@
 from pathlib import Path
+# import os
+# from dotenv import load_dotenv
+
+# from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
+
+# DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '[*]').split(',')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-#6$b&9w5_7_hs8oft9osl@!u!7)lu*3f7#)_q7ih_3lwg3xcgn'
 
@@ -62,6 +71,18 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('POSTGRES_DB', 'django'),
+#         'USER': os.getenv('POSTGRES_USER', 'django'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+#         'HOST': os.getenv('DB_HOST', ''),
+#         'PORT': os.getenv('DB_PORT', 5432)
+#     }
+# }
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -85,7 +106,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = '/backend_static/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

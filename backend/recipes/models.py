@@ -262,10 +262,6 @@ class Favorite(models.Model):
 
 class ShoppingCart(models.Model):
     """ Модель списка покупок """
-    cart_id = models.PositiveIntegerField(
-        default=0,
-        verbose_name='Номер списка',
-    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -300,10 +296,13 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-        ordering = ('cart_id',)
+        ordering = ('user',)
         constraints = [
             models.UniqueConstraint(
-                fields=['cart_id', 'ingredient'],
+                fields=['user', 'ingredient'],
                 name='unique_shopping_cart',
             )
         ]
+
+    def __str__(self) -> str:
+        return f'Список покупок пользователя {self.user}'

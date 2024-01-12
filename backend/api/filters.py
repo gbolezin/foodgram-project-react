@@ -9,7 +9,7 @@ class RecipeFilter(rest_framework.FilterSet):
         queryset=Tag.objects.all()
     )
     is_favorited = rest_framework.BooleanFilter(
-        field_name='is_favorited'
+        field_name='is_favorited',
     )
     is_in_shopping_cart = rest_framework.BooleanFilter(
         field_name='is_in_shopping_cart'
@@ -17,4 +17,9 @@ class RecipeFilter(rest_framework.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
+        fields = [
+            'author',
+            'tags',
+            'is_favorited',
+            'is_in_shopping_cart'
+        ]

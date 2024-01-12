@@ -189,10 +189,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         return Favorite.objects.filter(recipe=obj).count() > 0
 
-    # TO DO - make right computing
     def get_is_in_shopping_cart(self, obj):
-        # return ShoppingCart.objects.filter(recipe=obj).count() > 0
-        return False
+        return ShoppingCart.objects.filter(recipe=obj).count() > 0
 
     def validate_recipe_field(self, initial_data, data, field_name):
         field_value = initial_data.get(field_name)
@@ -317,13 +315,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         read_only=True
     )
     is_subscribed = serializers.SerializerMethodField()
-    recipes = SubscriptionRecipeSerializer(
-        many=True,
-        read_only=True,
-        required=False,
-        source='author.author_recipes'
-    )
-
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -346,6 +338,16 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.author_recipes.count()
+
+    def get_recipes(self, obj):
+        recipes_limit = self.context['recipes_limit']
+        if recipes_limit is not None:
+            recipes = obj.author.author_recipes.all()[:int(recipes_limit)]
+        else:
+            recipes = obj.author.author_recipes.all()
+        return SubscriptionRecipeSerializer(
+            recipes,
+            many=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

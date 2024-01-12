@@ -61,6 +61,16 @@ class FavoritesAdmin(admin.ModelAdmin):
     list_display_links = ('user', 'recipe',)
 
 
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'recipe',
+        'ingredient',
+        'amount'
+    )
+    list_display_links = ('user', 'recipe',)
+
+
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
@@ -68,6 +78,6 @@ admin.site.register(Tag)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Favorite, FavoritesAdmin)
-admin.site.register(ShoppingCart)
+admin.site.register(ShoppingCart, ShoppingCartAdmin)
 admin.site.register(IngredientsRecipes, IngredientsRecipesAdmin)
 admin.site.register(TagsRecipes)
