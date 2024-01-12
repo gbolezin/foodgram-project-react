@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -105,12 +106,16 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         author = get_object_or_404(User, id=self.kwargs.get('id'))
         follower = request.user
+        recipes_limit = request.GET.get('recipes_limit')
         if request.method == 'POST':
             self.check_subscription_data(author, follower)
             subscription = Subscription.objects.create(
                 author=author, follower=follower
             )
-            serializer = SubscriptionSerializer(subscription)
+            serializer = SubscriptionSerializer(
+                subscription,
+                context={'recipes_limit': recipes_limit}
+            )
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
@@ -153,7 +158,6 @@ class IngredientViewSet(mixins.ListModelMixin,
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """ Вьюсет Рецептов """
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
@@ -178,6 +182,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
             raise ValidationError(
                 'Добавить рецепт в избранное можно только один раз!'
             )
+
+    def get_queryset(self):
+        if not self.request.user.is_anonymous:
+            user = self.request.user
+        else:
+            user = None
+        qs = Recipe.objects.all().annotate(
+            is_favorited=Exists(Favorite.objects.filter(
+                user=user,
+                recipe_id=OuterRef("id")
+                )),
+            is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
+                user=user,
+                recipe_id=OuterRef("id")))
+        )
+        return qs
 
     @action(
             methods=['post', 'delete'],
@@ -255,3 +275,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             shopping_carts.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+            methods=['get', 'post', 'delete'],
+            detail=False,
+            url_path='download_shopping_cart',
+            permission_classes=[IsAuthenticated]
+    )
+    def download_shopping_cart(self, request, id=None):
+        return Response(status=status.HTTP_200_OK)

@@ -187,10 +187,20 @@ class RecipeSerializer(serializers.ModelSerializer):
                   )
 
     def get_is_favorited(self, obj):
-        return Favorite.objects.filter(recipe=obj).count() > 0
+        if not self.context['request'].user.is_anonymous:
+            user = self.context['request'].user
+        else:
+            user = None
+        return Favorite.objects.filter(
+            recipe=obj, user=user).count() > 0
 
     def get_is_in_shopping_cart(self, obj):
-        return ShoppingCart.objects.filter(recipe=obj).count() > 0
+        if not self.context['request'].user.is_anonymous:
+            user = self.context['request'].user
+        else:
+            user = None
+        return ShoppingCart.objects.filter(
+            recipe=obj, user=user).count() > 0
 
     def validate_recipe_field(self, initial_data, data, field_name):
         field_value = initial_data.get(field_name)
@@ -340,7 +350,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return obj.author.author_recipes.count()
 
     def get_recipes(self, obj):
-        recipes_limit = self.context['recipes_limit']
+        recipes_limit = self.context.get('recipes_limit')
         if recipes_limit is not None:
             recipes = obj.author.author_recipes.all()[:int(recipes_limit)]
         else:
