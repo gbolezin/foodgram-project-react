@@ -1,5 +1,7 @@
+import csv
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -283,4 +285,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request, id=None):
-        return Response(status=status.HTTP_200_OK)
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; '
+                f'filename="tmp/{request.user}/shopping_cart.csv"'
+            },
+        )
+
+        writer = csv.writer(response)
+        writer.writerow([f'Список покупок пользователя {request.user}'])
+
+        ingredients = ShoppingCart.objects.filter(
+            user=request.user).values(
+                'ingredient__name', 'ingredient__measurement_unit'
+            ).order_by(
+                'ingredient_id'
+            ).annotate(sum_amount=Sum('amount'))
+        for ingredient in ingredients:
+            writer.writerow(
+                [
+                    f'{ingredient["ingredient__name"]} '
+                    f'{ingredient["sum_amount"]} '
+                    f'{ingredient["ingredient__measurement_unit"]}'
+                ]
+            )
+
+        return response

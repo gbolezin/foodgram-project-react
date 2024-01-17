@@ -297,12 +297,6 @@ class ShoppingCart(models.Model):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
         ordering = ('user',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'ingredient'],
-                name='unique_shopping_cart',
-            )
-        ]
 
     def __str__(self) -> str:
         return f'Список покупок пользователя {self.user}'
