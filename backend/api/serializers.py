@@ -215,7 +215,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 if not Ingredient.objects.filter(id=ingredient['id']).first():
                     raise serializers.ValidationError(
                         f'Ингредиента с id={ingredient["id"]} не существует!')
-                if ingredient['amount'] < 1:
+                if int(ingredient['amount']) < 1:
                     raise serializers.ValidationError(
                         f'Количество ингредиента id={ingredient["id"]} '
                         'не может быть меньше 1!')
