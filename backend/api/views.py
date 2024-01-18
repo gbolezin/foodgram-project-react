@@ -3,9 +3,9 @@ from django.contrib.auth import get_user_model
 from django.db.models import Exists, OuterRef, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import filters, mixins, status, viewsets
+from django_filters import rest_framework as filters
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (IsAuthenticated,
@@ -13,7 +13,7 @@ from rest_framework.permissions import (IsAuthenticated,
                                         )
 from rest_framework.response import Response
 
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (CustomUserSerializer,
                              FavoriteSerializer,
@@ -144,18 +144,19 @@ class TagViewSet(mixins.ListModelMixin,
     pagination_class = None
 
 
-class IngredientViewSet(mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
     """ Вьюсет Ингредиентов """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     http_method_names = ['get']
     permission_classes = [IsAuthenticatedOrReadOnly,]
     pagination_class = None
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    search_fields = ('$name',)
-    filterset_fields = ('name',)
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -163,7 +164,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
     def check_shopping_data(self, recipe, user):

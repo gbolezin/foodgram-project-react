@@ -1,5 +1,13 @@
 from django_filters import rest_framework
-from recipes.models import Recipe, Tag
+from recipes.models import Ingredient, Recipe, Tag
+
+
+class IngredientFilter(rest_framework.FilterSet):
+    name = rest_framework.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
 
 
 class RecipeFilter(rest_framework.FilterSet):
