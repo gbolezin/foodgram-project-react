@@ -7,9 +7,9 @@ from django.core import exceptions as django_exceptions
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers
 from recipes.models import (Favorite, Ingredient, IngredientsRecipes, Recipe,
                             ShoppingCart, Subscription, Tag, TagsRecipes)
+from rest_framework import serializers
 
 EMAIL_MAX_LENGTH = 254
 USERNAME_MAX_LENGTH = 150
