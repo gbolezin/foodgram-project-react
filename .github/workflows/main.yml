@@ -79,7 +79,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend/
-        npm ci --legacy-peer-deps
+        npm install --legacy-peer-deps
 
     - name: Test frontend
       run: |
