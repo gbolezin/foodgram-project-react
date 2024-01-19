@@ -12,7 +12,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (CustomUserSerializer, FavoriteSerializer,
