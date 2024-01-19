@@ -11,8 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '[*]').split(',')
-ALLOWED_HOSTS=['127.0.0.1, localhost, foodgram.zenith24.ru, 84.252.138.4']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '[*]').split(',')
 CSRF_TRUSTED_ORIGINS = ['https://foodgram.zenith24.ru']
 
 INSTALLED_APPS = [
