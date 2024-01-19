@@ -1,6 +1,6 @@
 import base64
-import webcolors
 
+import webcolors
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
