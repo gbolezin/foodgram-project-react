@@ -176,19 +176,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
     def get_queryset(self):
-        if not self.request.user.is_anonymous:
-            user = self.request.user
+        user = self.request.user
+        if user.is_anonymous:
+            qs = Recipe.objects.all()
         else:
-            user = None
-        qs = Recipe.objects.all().annotate(
-            is_favorited=Exists(Favorite.objects.filter(
-                user=user,
-                recipe_id=OuterRef("id")
-                )),
-            is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
-                user=user,
-                recipe_id=OuterRef("id")))
-        )
+            qs = Recipe.objects.all().annotate(
+                is_favorited=Exists(Favorite.objects.filter(
+                    user=user,
+                    recipe_id=OuterRef("id")
+                    )),
+                is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
+                    user=user,
+                    recipe_id=OuterRef("id")))
+            )
         return qs
 
     @action(
