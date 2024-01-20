@@ -142,7 +142,7 @@ class IngredientViewSet(
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     http_method_names = ['get']
-    permission_classes = [IsAuthenticatedOrReadOnly,]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
     pagination_class = None
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = IngredientFilter
@@ -181,10 +181,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             qs = Recipe.objects.all()
         else:
             qs = Recipe.objects.all().annotate(
-                is_favorited=Exists(Favorite.objects.filter(
-                    user=user,
-                    recipe_id=OuterRef("id")
-                    )),
+                is_favorited=Exists(
+                    Favorite.objects.filter(
+                        user=user,
+                        recipe_id=OuterRef("id")
+                    )
+                ),
                 is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
                     user=user,
                     recipe_id=OuterRef("id")))
@@ -192,10 +194,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return qs
 
     @action(
-            methods=['post', 'delete'],
-            detail=True,
-            url_path='favorite',
-            permission_classes=[IsAuthenticated]
+        methods=['post', 'delete'],
+        detail=True,
+        url_path='favorite',
+        permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk=None):
         recipe = Recipe.objects.filter(id=self.kwargs.get('pk')).first()
@@ -228,10 +230,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-            methods=['post', 'delete'],
-            detail=True,
-            url_path='shopping_cart',
-            permission_classes=[IsAuthenticated]
+        methods=['post', 'delete'],
+        detail=True,
+        url_path='shopping_cart',
+        permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, pk=None):
         recipe = Recipe.objects.filter(id=self.kwargs.get('pk')).first()
@@ -289,9 +291,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = ShoppingCart.objects.filter(
             user=request.user).values(
                 'ingredient__name', 'ingredient__measurement_unit'
-            ).order_by(
-                'ingredient_id'
-            ).annotate(sum_amount=Sum('amount'))
+            ).order_by('ingredient_id').annotate(sum_amount=Sum('amount'))
         for ingredient in ingredients:
             writer.writerow(
                 [

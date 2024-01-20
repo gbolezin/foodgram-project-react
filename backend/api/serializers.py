@@ -343,7 +343,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'recipes',
             'recipes_count',
-            )
+        )
 
     def get_is_subscribed(self, obj):
         if Subscription.objects.filter(author=obj.author).first():
