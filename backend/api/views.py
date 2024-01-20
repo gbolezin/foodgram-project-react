@@ -291,8 +291,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = ShoppingCart.objects.filter(
             user=request.user).values(
                 'ingredient__name',
-                'ingredient__measurement_unit'
-            ).order_by('ingredient_id').annotate(sum_amount=Sum('amount'))
+                'ingredient__measurement_unit').order_by(
+                    'ingredient_id').annotate(sum_amount=Sum('amount'))
         for ingredient in ingredients:
             writer.writerow(
                 [
