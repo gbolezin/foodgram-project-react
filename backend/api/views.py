@@ -40,10 +40,10 @@ class CustomUserViewSet(UserViewSet):
             )
 
     @action(
-            methods=['get', 'post'],
-            detail=False,
-            url_path='me',
-            permission_classes=[IsAuthenticated]
+        methods=['get', 'post'],
+        detail=False,
+        url_path='me',
+        permission_classes=[IsAuthenticated]
     )
     def current_user(self, request):
         if request.method == 'GET':
@@ -63,10 +63,10 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
-            methods=['get'],
-            detail=False,
-            url_path='subscriptions',
-            permission_classes=[IsAuthenticated]
+        methods=['get'],
+        detail=False,
+        url_path='subscriptions',
+        permission_classes=[IsAuthenticated]
     )
     def current_user_subscriptions(self, request):
         if request.method == 'GET':
@@ -89,10 +89,10 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
-            methods=['post', 'delete'],
-            detail=True,
-            url_path='subscribe',
-            permission_classes=[IsAuthenticated]
+        methods=['post', 'delete'],
+        detail=True,
+        url_path='subscribe',
+        permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, id=None):
         author = get_object_or_404(User, id=self.kwargs.get('id'))
@@ -129,7 +129,7 @@ class TagViewSet(mixins.ListModelMixin,
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     http_method_names = ['get']
-    permission_classes = [IsAuthenticatedOrReadOnly,]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
     pagination_class = None
 
 
