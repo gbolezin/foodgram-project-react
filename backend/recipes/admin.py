@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -12,21 +11,19 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('username', 'email')
 
 
-class RecipeForm(forms.ModelForm):
-    model = Recipe
-    # TO DO
-    # we need to count of favourites of this Recipe
-    count_in_favourites = forms.IntegerField(label='Добавлен в избранное')
-
-
 class RecipeAdmin(admin.ModelAdmin):
-    form = RecipeForm
     list_display = (
         'name',
         'author',
     )
     list_filter = ('author', 'name', 'tags')
     list_display_links = ('name',)
+    readonly_fields = ('favorite_count',)
+
+    def favorite_count(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
+
+    favorite_count.short_description = 'Добавлен в избранное'
 
 
 class IngredientAdmin(admin.ModelAdmin):

@@ -7,7 +7,7 @@ app_name = 'api'
 
 router_v1 = routers.DefaultRouter()
 router_v1.register(
-    prefix='users',
+    prefix=r'users',
     viewset=CustomUserViewSet,
     basename='users'
 )
