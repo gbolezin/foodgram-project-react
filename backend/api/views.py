@@ -271,10 +271,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-            methods=['get', 'post', 'delete'],
-            detail=False,
-            url_path='download_shopping_cart',
-            permission_classes=[IsAuthenticated]
+        methods=['get', 'post', 'delete'],
+        detail=False,
+        url_path='download_shopping_cart',
+        permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request, id=None):
         response = HttpResponse(
@@ -288,8 +288,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         writer = csv.writer(response)
         writer.writerow([f'Список покупок пользователя {request.user}'])
 
-        ingredients = ShoppingCart.objects.filter(
-            user=request.user).values(
+        ingredients = ShoppingCart.objects.filter(user=request.user).values(
                 'ingredient__name', 'ingredient__measurement_unit'
             ).order_by('ingredient_id').annotate(sum_amount=Sum('amount'))
         for ingredient in ingredients:
