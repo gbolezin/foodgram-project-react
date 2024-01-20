@@ -288,8 +288,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         writer = csv.writer(response)
         writer.writerow([f'Список покупок пользователя {request.user}'])
 
-        ingredients = ShoppingCart.objects.filter(user=request.user).values(
-                'ingredient__name', 'ingredient__measurement_unit'
+        ingredients = ShoppingCart.objects.filter(
+            user=request.user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit'
             ).order_by('ingredient_id').annotate(sum_amount=Sum('amount'))
         for ingredient in ingredients:
             writer.writerow(
