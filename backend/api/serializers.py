@@ -73,7 +73,10 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        if Subscription.objects.filter(author=obj).first():
+        if Subscription.objects.filter(
+            author=obj,
+            follower=self.context['request'].user
+        ).first():
             return True
         return False
 
