@@ -203,40 +203,45 @@ class RecipeSerializer(serializers.ModelSerializer):
         return ShoppingCart.objects.filter(
             recipe=obj, user=user).count() > 0
 
+    def validate_recipe_ingredients(self, field_value):
+        ingredients = field_value
+        ingredient_ids = []
+        for ingredient in ingredients:
+            if not Ingredient.objects.filter(id=ingredient['id']).first():
+                raise serializers.ValidationError(
+                    f'Ингредиента с id={ingredient["id"]} не существует!')
+            if int(ingredient['amount']) < 1:
+                raise serializers.ValidationError(
+                    f'Количество ингредиента id={ingredient["id"]} '
+                    'не может быть меньше 1!')
+            ingredient_ids.append(ingredient['id'])
+        ingredient_set = set(ingredient_ids)
+        if len(ingredient_set) != len(ingredient_ids):
+            raise serializers.ValidationError(
+                'Ингредиенты в рецепте должны быть уникальны!'
+            )
+
+    def validate_recipe_tags(self, field_value):
+        tags = field_value
+        for tag in tags:
+            if not Tag.objects.filter(id=tag).first():
+                raise serializers.ValidationError(
+                    f'Тэга с id={tag} не существует!')
+        tag_set = set(tags)
+        if len(tag_set) != len(tags):
+            raise serializers.ValidationError(
+                'Тэги в рецепте должны быть уникальны!'
+            )
+
     def validate_recipe_field(self, initial_data, data, field_name):
         field_value = initial_data.get(field_name)
         if not field_value:
             raise serializers.ValidationError(
                 f'Поле {field_name} не может быть пустым!')
-
         if field_name == 'ingredients':
-            ingredients = field_value
-            ingredient_ids = []
-            for ingredient in ingredients:
-                if not Ingredient.objects.filter(id=ingredient['id']).first():
-                    raise serializers.ValidationError(
-                        f'Ингредиента с id={ingredient["id"]} не существует!')
-                if int(ingredient['amount']) < 1:
-                    raise serializers.ValidationError(
-                        f'Количество ингредиента id={ingredient["id"]} '
-                        'не может быть меньше 1!')
-                ingredient_ids.append(ingredient['id'])
-            ingredient_set = set(ingredient_ids)
-            if len(ingredient_set) != len(ingredient_ids):
-                raise serializers.ValidationError(
-                    'Ингредиенты в рецепте должны быть уникальны!'
-                )
+            self.validate_recipe_ingredients(field_value)
         if field_name == 'tags':
-            tags = field_value
-            for tag in tags:
-                if not Tag.objects.filter(id=tag).first():
-                    raise serializers.ValidationError(
-                        f'Тэга с id={tag} не существует!')
-            tag_set = set(tags)
-            if len(tag_set) != len(tags):
-                raise serializers.ValidationError(
-                    'Тэги в рецепте должны быть уникальны!'
-                )
+            self.validate_recipe_tags(field_value)
         if field_name == 'image':
             pass
         else:
