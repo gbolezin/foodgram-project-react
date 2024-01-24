@@ -9,9 +9,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-DB_ENGINE=os.getenv('DB_ENGINE', 'sqlite')
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','*').split(',')
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS','*').split(',')
+DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '*').split(',')
 AUTH_USER_MODEL = 'recipes.User'
 
 INSTALLED_APPS = [
@@ -131,7 +131,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user': 'api.serializers.CustomUserSerializer',
         'current_user': 'api.serializers.CustomUserSerializer',
-     },
+    },
     'HIDE_USERS': False,
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
@@ -141,4 +141,3 @@ DJOSER = {
 
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
-

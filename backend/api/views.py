@@ -108,8 +108,8 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, id=self.kwargs.get('id'))
         follower = request.user
         subscription = Subscription.objects.filter(
-                author=author, follower=follower
-            ).first()
+            author=author, follower=follower
+        ).first()
         if subscription is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         subscription.delete()
@@ -223,7 +223,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         user = request.user
         shopping_cart_count, shopping_cart = ShoppingCart.objects.filter(
-                user=user, recipe=recipe
+            user=user, recipe=recipe
         ).delete()
         if shopping_cart_count == 0:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -245,8 +245,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         writer = csv.writer(response)
         ingredients = IngredientsRecipes.objects.filter(
-               recipe_id__in=ShoppingCart.objects.filter(
-                   user=request.user).values('recipe_id')
+            recipe_id__in=ShoppingCart.objects.filter(
+                user=request.user).values('recipe_id')
             ).values('ingredient__name', 'ingredient__measurement_unit'
                      ).annotate(sum_amount=Sum('amount'))
         for ingredient in ingredients:

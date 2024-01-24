@@ -37,9 +37,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return bool(
-            self.context.get('request') and
-            self.context['request'].user.is_authenticated and
-            Subscription.objects.filter(
+            self.context.get('request')
+            and self.context['request'].user.is_authenticated
+            and Subscription.objects.filter(
                 author=obj,
                 follower=self.context['request'].user).first()
         )
@@ -144,18 +144,18 @@ class RecipeListRetrieveSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         return bool(
-            self.context.get('request') and
-            self.context['request'].user.is_authenticated and
-            Favorite.objects.filter(
+            self.context.get('request')
+            and self.context['request'].user.is_authenticated
+            and Favorite.objects.filter(
                 recipe=obj,
                 user=self.context['request'].user).count() > 0
         )
 
     def get_is_in_shopping_cart(self, obj):
         return bool(
-            self.context.get('request') and
-            self.context['request'].user.is_authenticated and
-            ShoppingCart.objects.filter(
+            self.context.get('request')
+            and self.context['request'].user.is_authenticated
+            and ShoppingCart.objects.filter(
                 recipe=obj,
                 user=self.context['request'].user).count() > 0
         )
