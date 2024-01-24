@@ -1,11 +1,10 @@
+import recipes.constants as constants
 from colorfield.fields import ColorField
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
-
-import recipes.constants as constants
 
 
 def validate_exclude_me(value):

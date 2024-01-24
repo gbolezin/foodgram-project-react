@@ -1,13 +1,12 @@
+import recipes.constants as constants
 import webcolors
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
-
-import recipes.constants as constants
 from recipes.models import (Favorite, Ingredient, IngredientsRecipes, Recipe,
                             ShoppingCart, Subscription, Tag, TagsRecipes, User)
+from rest_framework import serializers
 
 
 class Hex2NameColor(serializers.Field):
