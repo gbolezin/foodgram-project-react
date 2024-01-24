@@ -1,31 +1,81 @@
-from django.contrib.auth import get_user_model
+from colorfield.fields import ColorField
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-MIN_TIME_COOKING = 1
-MAX_TIME_COOKING = 360
-MIN_INGREDIENT_AMOUNT = 1
-MAX_INGREDIENT_AMOUNT = 1000
+import recipes.constants as constants
 
-User = get_user_model()
+
+def validate_exclude_me(value):
+    if value.lower() == "me":
+        raise ValidationError('Нельзя использовать "me" в качестве имени.')
+
+
+class User(AbstractUser):
+    """ Модель Пользователь """
+    email = models.EmailField(
+        'Адрес электронной почты',
+        unique=True,
+        max_length=constants.EMAIL_MAX_LENGTH,
+        error_messages={
+            'unique': 'Пользователь с таким email уже существует',
+        },
+    )
+    username = models.CharField(
+        'Имя пользователя',
+        max_length=constants.USERNAME_MAX_LENGTH,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+\Z',
+                message='Нельзя использовать "me" в качестве имени.',
+            ),
+            validate_exclude_me,
+        ],
+        error_messages={
+            'unique': 'пользователь с таким именем уже существует',
+        },
+
+    )
+    first_name = models.CharField(
+        'Имя',
+        max_length=constants.FIRST_NAME_MAX_LENGTH,
+    )
+    last_name = models.CharField(
+        'Фамилия',
+        max_length=constants.LAST_NAME_MAX_LENGTH,
+    )
+    password = models.CharField(
+        'Пароль',
+        max_length=constants.PASSWORD_MAX_LENGTH,
+    )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('last_name', 'first_name', 'username')
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
 
 
 class Tag(models.Model):
     """ Модель тэг """
     name = models.CharField(
         default='Тэг',
-        max_length=256,
+        max_length=constants.TAG_NAME_MAX_LENGTH,
         unique=True,
         verbose_name='Заголовок тэга',
     )
-    color = models.CharField(
+    color = ColorField(
         default='#49B64E',
         max_length=7,
         unique=True,
         verbose_name='Цвет',
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=constants.TAG_SLUG_MAX_LENGTH,
         unique=True,
         verbose_name='Слаг',
     )
@@ -43,12 +93,12 @@ class Ingredient(models.Model):
     """ Модель Ингредиент """
     name = models.CharField(
         default='Ингредиент',
-        max_length=256,
+        max_length=constants.INGREDIENT_NAME_MAX_LENGTH,
         verbose_name='Наименование ингредиента',
     )
     measurement_unit = models.CharField(
         default='шт.',
-        max_length=210,
+        max_length=constants.INGREDIENT_MU_MAX_LENGTH,
         verbose_name='Единица измерения',
     )
 
@@ -56,6 +106,12 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient_mu',
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -71,15 +127,14 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         default='Название',
-        max_length=200,
+        max_length=constants.RECIPE_NAME_MAX_LENGTH,
         verbose_name='Наименование',
     )
     image = models.ImageField(
         upload_to='recipes/images/',
         verbose_name='Фото готового блюда'
     )
-    text = models.CharField(
-        max_length=150,
+    text = models.TextField(
         null=False,
         blank=False,
         verbose_name='Текст рецепта',
@@ -97,11 +152,17 @@ class Recipe(models.Model):
         through='TagsRecipes',
         verbose_name='Тэги',
     )
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         default=1,
         validators=[
-            MinValueValidator(limit_value=MIN_TIME_COOKING),
-            MaxValueValidator(limit_value=MAX_TIME_COOKING),
+            MinValueValidator(
+                limit_value=constants.MIN_TIME_COOKING,
+                message='Время приготовления '
+                f'не может быть меньше {constants.MIN_TIME_COOKING}'),
+            MaxValueValidator(
+                limit_value=constants.MAX_TIME_COOKING,
+                message='Время приготовления '
+                f'не может быть больше {constants.MAX_TIME_COOKING}'),
         ],
         verbose_name='Время приготовления',
         help_text='Введите время приготовления в минутах'
@@ -165,8 +226,14 @@ class IngredientsRecipes(models.Model):
     )
     amount = models.PositiveIntegerField(
         validators=[
-            MinValueValidator(limit_value=MIN_INGREDIENT_AMOUNT),
-            MaxValueValidator(limit_value=MAX_INGREDIENT_AMOUNT),
+            MinValueValidator(
+                limit_value=constants.MIN_INGREDIENT_AMOUNT,
+                message='Количество ингредиента '
+                f'не может быть меньше {constants.MIN_INGREDIENT_AMOUNT}'),
+            MaxValueValidator(
+                limit_value=constants.MAX_INGREDIENT_AMOUNT,
+                message='Количество ингредиента '
+                f'не может быть больше {constants.MAX_INGREDIENT_AMOUNT}'),
         ],
         verbose_name='Количество ингредиента',
     )
@@ -273,19 +340,6 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
         related_name='recipe_shopping_carts'
-    )
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        verbose_name='Ингредиент',
-        related_name='ingredient_shopping_carts'
-    )
-    amount = models.PositiveIntegerField(
-        validators=[
-            MinValueValidator(limit_value=MIN_INGREDIENT_AMOUNT),
-            MaxValueValidator(limit_value=MAX_INGREDIENT_AMOUNT),
-        ],
-        verbose_name='Количество ингредиента',
     )
     creation_date = models.DateTimeField(
         auto_now_add=True,
