@@ -1,5 +1,8 @@
+from django.db.models import Exists, OuterRef, Value
 from django_filters import rest_framework
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+
+FILTER_FLAGS = {0, 1}
 
 
 class IngredientFilter(rest_framework.FilterSet):
@@ -25,19 +28,40 @@ class RecipeFilter(rest_framework.FilterSet):
         method='filter_shopping_cart'
     )
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            qs = Recipe.objects.all().annotate(
+               is_favorited=Value(False),
+               is_in_shopping_cart=Value(False)
+            )
+        else:
+            qs = Recipe.objects.all().annotate(
+                is_favorited=Exists(
+                    Favorite.objects.filter(
+                        user=user,
+                        recipe_id=OuterRef("id")
+                    )
+                ),
+                is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
+                    user=user,
+                    recipe_id=OuterRef("id")))
+            )
+        return qs
+
     def filter_favorited(self, queryset, name, value):
-        if value == 1:
-            expr = True
-        elif value == 0:
-            expr = False
-        return queryset.filter(is_favorited=expr)
+        if not self.request.user.is_anonymous:
+            if value in FILTER_FLAGS:
+                queryset = self.get_queryset()
+                return queryset.filter(is_favorited=value)
+        return queryset.none()
 
     def filter_shopping_cart(self, queryset, name, value):
-        if value == 1:
-            expr = True
-        elif value == 0:
-            expr = False
-        return queryset.filter(is_in_shopping_cart=expr)
+        if not self.request.user.is_anonymous:
+            if value in FILTER_FLAGS:
+                queryset = self.get_queryset()
+                return queryset.filter(is_in_shopping_cart=value)
+        return queryset.none()
 
     class Meta:
         model = Recipe
