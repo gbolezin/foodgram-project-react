@@ -114,8 +114,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         many=True
     )
     tags = serializers.PrimaryKeyRelatedField(
-       many=True,
-       queryset=Tag.objects.all()
+        many=True,
+        queryset=Tag.objects.all()
     )
 
     image = Base64ImageField(

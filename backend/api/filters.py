@@ -32,8 +32,8 @@ class RecipeFilter(rest_framework.FilterSet):
         user = self.request.user
         if user.is_anonymous:
             qs = Recipe.objects.all().annotate(
-               is_favorited=Value(False),
-               is_in_shopping_cart=Value(False)
+                is_favorited=Value(False),
+                is_in_shopping_cart=Value(False)
             )
         else:
             qs = Recipe.objects.all().annotate(
