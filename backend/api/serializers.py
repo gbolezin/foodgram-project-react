@@ -1,7 +1,9 @@
 from drf_extra_fields.fields import Base64FieldMixin, Base64ImageField
+
+from rest_framework import serializers
+
 from recipes.models import (Favorite, Ingredient, IngredientsRecipes, Recipe,
                             ShoppingCart, Subscription, Tag, User)
-from rest_framework import serializers
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -141,35 +143,37 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         else:
             return value
 
-    def validate_empty_tags_ingredients(self, field_name, field_value):
-        if len(field_value) == 0:
+    def validate_empty_tags_ingredients(self, field_name, field_values):
+        if len(field_values) == 0:
             raise serializers.ValidationError(
                 f'Поле {field_name} не может быть пустым!'
             )
-        return field_value
-
-    def validate_tags(self, value):
-        value = self.validate_empty_tags_ingredients('tags', value)
-        field_set = set(value)
-        if len(value) > len(field_set):
-            raise serializers.ValidationError(
-                'Поле tags рецепте должно быть уникально!'
-            )
-        return value
-
-    def validate_ingredients(self, ingredients):
-        ingredients = self.validate_empty_tags_ingredients(
-            'ingredients',
-            ingredients
-        )
-        ingredient_ids = []
-        for ingredient in ingredients:
-            if ingredient in ingredient_ids:
+        field_ids = []
+        for field in field_values:
+            if field in field_ids:
                 raise serializers.ValidationError(
-                    'Ингредиенты в рецепте должны быть уникальны!'
+                    f'{field_name} в рецепте должны быть уникальны!'
                 )
-            ingredient_ids.append(ingredient)
-        return ingredients
+            field_ids.append(field)
+
+    def validate(self, data):
+        if 'ingredients' not in data:
+            raise serializers.ValidationError(
+                'Поле ingredients не может быть пустым!'
+            )
+        self.validate_empty_tags_ingredients(
+            'ingredients',
+            data['ingredients']
+        )
+        if 'tags' not in data:
+            raise serializers.ValidationError(
+                'Поле tags не может быть пустым!'
+            )
+        self.validate_empty_tags_ingredients(
+            'tags',
+            data['tags']
+        )
+        return data
 
     def make_tags_ingredients(self, recipe, ingredients, tags):
         ingredient_objs = [
@@ -195,14 +199,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """ Обновляем запись в БД о рецепте """
-        if 'ingredients' not in validated_data:
-            raise serializers.ValidationError(
-                'Поле ingredients не может быть пустым!'
-            )
-        if 'tags' not in validated_data:
-            raise serializers.ValidationError(
-                'Поле tags не может быть пустым!'
-            )
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         IngredientsRecipes.objects.filter(recipe=instance).delete()
@@ -222,14 +218,12 @@ class SubscriptionRecipeSerializer(serializers.ModelSerializer):
 
 class SubscriptionListSerializer(CustomUserSerializer):
     """ Сериализатор для подписок """
-    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserSerializer.Meta):
         model = User
         fields = CustomUserSerializer.Meta.fields + (
-            'is_subscribed',
             'recipes',
             'recipes_count',
         )
@@ -245,15 +239,13 @@ class SubscriptionListSerializer(CustomUserSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         recipes_limit = request.GET.get('recipes_limit')
+        recipes = obj.author_recipes.all()
         if recipes_limit is not None:
             try:
                 int_recipes_limit = int(recipes_limit)
                 recipes = obj.author_recipes.all()[:int(int_recipes_limit)]
             except ValueError:
-                recipes = obj.author_recipes.all()
                 pass
-        else:
-            recipes = obj.author_recipes.all()
         return SubscriptionRecipeSerializer(
             recipes,
             many=True).data

@@ -1,9 +1,10 @@
-import recipes.constants as constants
 from colorfield.fields import ColorField
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+import recipes.constants as constants
 
 
 class User(AbstractUser):
@@ -211,8 +212,14 @@ class IngredientsRecipes(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(constants.MIN_INGREDIENT_AMOUNT),
-            MaxValueValidator(constants.MAX_INGREDIENT_AMOUNT),
+            MinValueValidator(
+                constants.MIN_INGREDIENT_AMOUNT,
+                message='Количество ингредиента '
+                f'не может быть меньше {constants.MIN_INGREDIENT_AMOUNT}'),
+            MaxValueValidator(
+                constants.MAX_INGREDIENT_AMOUNT,
+                message='Количество ингредиента '
+                f'не может быть больше {constants.MAX_INGREDIENT_AMOUNT}'),
         ],
         verbose_name='Количество ингредиента'
     )

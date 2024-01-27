@@ -27,12 +27,11 @@ services:
     command: cp -r /app/build/. /frontend_static/
 
   gateway:
-    build: ./nginx/
+    build: ./infra/
     volumes:   
       - static:/staticfiles
-      - media:/media    
+      - media:/media
     ports:
       - 9001:80
     depends_on:
       - backend
-
