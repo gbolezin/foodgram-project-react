@@ -1,6 +1,6 @@
 from django_filters import rest_framework
 
-from recipes.models import Ingredient, Recipe, ShoppingCart, Tag
+from recipes.models import Ingredient, Recipe, Tag
 
 
 class IngredientFilter(rest_framework.FilterSet):
@@ -25,23 +25,17 @@ class RecipeFilter(rest_framework.FilterSet):
     )
 
     def filter_favorited(self, queryset, name, value):
-        try:
-            if self.request.user.is_authenticated and value:
-                return queryset.filter(
-                    recipe_favorites__user=self.request.user
-                )
-        except ValueError:
-            pass
+        if self.request.user.is_authenticated and value:
+            return queryset.filter(
+                recipe_favorites__user=self.request.user
+            )
         return queryset
 
     def filter_shopping_cart(self, queryset, name, value):
-        try:
-            if self.request.user.is_authenticated and value:
-                return queryset.filter(
-                    id__in=ShoppingCart.objects.filter(
-                        user=self.request.user).values('recipe_id'))
-        except ValueError:
-            pass
+        if self.request.user.is_authenticated and value:
+            return queryset.filter(
+                recipe_shopping_carts__user=self.request.user
+                )
         return queryset
 
     class Meta:
