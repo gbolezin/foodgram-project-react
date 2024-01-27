@@ -54,3 +54,5 @@ API реализован на Django Rest Framework
 Автор проекта - Болезин Георгий (Bolezin George)
 e-mail: g.bolezin@zenith24.ru
 tg: @gbolezin
+https://foodgram.zenith24.ru
+
