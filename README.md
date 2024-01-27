@@ -47,8 +47,46 @@ API реализован на Django Rest Framework
 
 Пример запросов/ответов
 
-Пример запроса 
-/api/users/
+Пример запроса №1
+GET https://foodgram.zenith24.ru/api/users/
+
+Пример ответа №1
+{
+  "count": 123,
+  "next": "http://foodgram.example.org/api/users/?page=4",
+  "previous": "http://foodgram.example.org/api/users/?page=2",
+  "results": [
+    {
+      "email": "user@example.com",
+      "id": 0,
+      "username": "string",
+      "first_name": "Вася",
+      "last_name": "Пупкин",
+      "is_subscribed": false
+    }
+  ]
+}
+
+Пример запроса №2:
+POST https://foodgram.zenith24.ru/api/recipes/
+
+Пример ответа №2:
+{
+  "ingredients": [
+    {
+      "id": 1123,
+      "amount": 10
+    }
+  ],
+  "tags": [
+    1,
+    2
+  ],
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+  "name": "string",
+  "text": "string",
+  "cooking_time": 1
+}
 
 
 Автор проекта - Болезин Георгий (Bolezin George)
