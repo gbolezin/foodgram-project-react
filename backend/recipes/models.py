@@ -1,10 +1,9 @@
+import recipes.constants as constants
 from colorfield.fields import ColorField
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
-import recipes.constants as constants
 
 
 class User(AbstractUser):

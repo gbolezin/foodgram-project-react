@@ -2,7 +2,6 @@ import csv
 import json
 
 from django.core.management.base import BaseCommand, CommandError
-
 from recipes.models import Ingredient
 
 MODEL = Ingredient
