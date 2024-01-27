@@ -8,7 +8,7 @@ import recipes.constants as constants
 
 
 class User(AbstractUser):
-    """ Модель Пользователь """
+    """ Модель Пользователь  """
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('last_name', 'first_name', 'username')
 
