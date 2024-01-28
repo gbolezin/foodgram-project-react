@@ -35,7 +35,7 @@ class RecipeFilter(rest_framework.FilterSet):
         if self.request.user.is_authenticated and value:
             return queryset.filter(
                 recipe_shopping_carts__user=self.request.user
-                )
+            )
         return queryset
 
     class Meta:
