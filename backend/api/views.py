@@ -7,6 +7,7 @@ from django_filters import rest_framework as filters
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
@@ -22,6 +23,11 @@ from api.serializers import (CustomUserSerializer, FavoriteSerializer,
                              SubscriptionListSerializer, TagListSerializer)
 from recipes.models import (Favorite, Ingredient, IngredientsRecipes, Recipe,
                             ShoppingCart, Subscription, Tag, User)
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 6
+    page_size_query_param = 'limit'
 
 
 class CustomUserViewSet(UserViewSet):
@@ -117,6 +123,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':

@@ -105,10 +105,9 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = '/backend_static/static/'
+STATIC_ROOT = '/backend_static/static/'
 MEDIA_URL = '/media/'
-# MEDIA_ROOT = '/media'
-MEDIA_ROOT = BASE_DIR/'media'
+MEDIA_ROOT = '/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -123,8 +122,8 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
     'DEFAULT_PAGINATION_CLASS':
-    'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 6
+    'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {

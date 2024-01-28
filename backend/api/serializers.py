@@ -147,20 +147,29 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f'Поле {field_name} не может быть пустым!'
             )
+
+    def get_tag_ingredient_id(self, field_name, field_value):
+        if field_name == 'ingredients':
+            return field_value['ingredient']['id']
+        return field_value
+
+    def validate_unique_tags_ingredients(self, field_name, field_value):
+        self.validate_empty_tags_ingredients(field_name, field_value)
         field_ids = []
-        for field in field_values:
-            if field in field_ids:
+        for field in field_value:
+            field_id = self.get_tag_ingredient_id(field_name, field)
+            if field_id in field_ids:
                 raise serializers.ValidationError(
-                    f'{field_name} в рецепте должны быть уникальны!'
+                    f'Поле {field_name} в рецепте должны быть уникальны!'
                 )
-            field_ids.append(field)
+            field_ids.append(field_id)
 
     def validate(self, data):
         if 'ingredients' not in data:
             raise serializers.ValidationError(
                 'Поле ingredients не может быть пустым!'
             )
-        self.validate_empty_tags_ingredients(
+        self.validate_unique_tags_ingredients(
             'ingredients',
             data['ingredients']
         )
@@ -168,7 +177,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Поле tags не может быть пустым!'
             )
-        self.validate_empty_tags_ingredients(
+        self.validate_unique_tags_ingredients(
             'tags',
             data['tags']
         )
