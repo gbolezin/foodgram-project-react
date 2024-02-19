@@ -38,7 +38,8 @@
 API реализован на Django Rest Framework
 Фронтэнд выполнени на стеке React
 СУБД PostgreSQL, веб-сервер Nginx
-
+Контейнеризация Docker
+Для автоматизации деплоя использован GitHub Actions
 
 Документация
 
